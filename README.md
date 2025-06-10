@@ -16,7 +16,7 @@
 ## 0. Ficha del proyecto
 
 ### **0.1. Tu nombre completo:**
-[Tu nombre]
+Brandon Andres Angulo Echeverry
 
 ### **0.2. Nombre del proyecto:**
 Asistente de Recetas Inteligente
