@@ -397,4 +397,4 @@ Mejoras de rendimiento en frontend y backend
 - Implementación de caché
 - Optimización de consultas
 - Lazy loading de componentes
-- Métricas de rendimiento 
+- Métricas de rendimiento
