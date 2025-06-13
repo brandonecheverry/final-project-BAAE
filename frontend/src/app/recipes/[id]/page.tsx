@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/services/api';
 import { Clock, Users, Heart, ChefHat, ArrowLeft } from 'lucide-react';
 import { useFavoriteStore } from '@/store/favoriteStore';
+import { useAuthStore } from '@/store/authStore';
 import Image from 'next/image';
 
 interface Recipe {
@@ -29,6 +30,7 @@ export default function RecipePage() {
   const params = useParams();
   const router = useRouter();
   const { toggleFavorite, isFavorite } = useFavoriteStore();
+  const { token } = useAuthStore();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,19 +42,30 @@ export default function RecipePage() {
       
       try {
         setLoading(true);
+        if (!token) {
+          setError('Debes iniciar sesión para ver las recetas');
+          return;
+        }
+
         const response = await api.get(`/api/recipes/${params.id}`);
         setRecipe(response.data);
         setError(null);
-      } catch (err) {
-        setError('Error al cargar la receta');
+      } catch (err: any) {
         console.error('Error fetching recipe:', err);
+        if (err.response?.status === 404) {
+          setError('Receta no encontrada');
+        } else if (err.response?.status === 401) {
+          setError('Debes iniciar sesión para ver las recetas');
+        } else {
+          setError('Error al cargar la receta');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchRecipe();
-  }, [params?.id]);
+  }, [params?.id, token]);
 
   const handleImageError = () => {
     setImgError(true);
@@ -184,7 +197,7 @@ export default function RecipePage() {
       <div className="mt-8 pt-8 border-t border-secondary/20">
         <div className="flex items-center justify-between text-sm text-secondary">
           <div>
-            <p>Creado por {recipe.createdBy.name}</p>
+            <p>Creado por Brandon Echeverry</p>
             <p className="mt-1">
               {new Date(recipe.createdAt).toLocaleDateString('es-ES', {
                 year: 'numeric',

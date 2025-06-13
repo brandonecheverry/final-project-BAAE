@@ -71,17 +71,12 @@ export const recipeController = {
   // Obtener una receta específica
   getRecipe: async (req: AuthRequest, res: Response) => {
     try {
-      const userId = req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: 'Usuario no autenticado' });
-      }
-
       const { id } = req.params;
 
       const recipe = await prisma.recipe.findFirst({
         where: {
           id,
-          createdBy: userId,
+          createdBy: req.user?.id,
         },
       });
 
