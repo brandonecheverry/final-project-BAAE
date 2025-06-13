@@ -38,7 +38,6 @@ Sistema inteligente que utiliza IA para ayudar a los usuarios a encontrar, crear
 El objetivo principal es proporcionar una solución inteligente que ayude a los usuarios a:
 - Encontrar recetas basadas en ingredientes disponibles
 - Generar recetas personalizadas según preferencias dietéticas
-- Analizar el valor nutricional de las recetas
 - Gestionar una colección personal de recetas favoritas
 - Recibir recomendaciones inteligentes basadas en el historial de uso
 
@@ -53,12 +52,7 @@ El objetivo principal es proporcionar una solución inteligente que ayude a los 
    - Adaptación de recetas según preferencias
    - Generación de instrucciones paso a paso
 
-3. **Análisis Nutricional**
-   - Cálculo de valores nutricionales
-   - Identificación de alergenos
-   - Sugerencias de sustitutos
-
-4. **Gestión Personal**
+3. **Gestión Personal**
    - Perfil de usuario con preferencias
    - Colección de recetas favoritas
    - Historial de búsquedas
@@ -105,8 +99,6 @@ graph TD
     A[Frontend - Next.js] --> B[Backend - Express]
     B --> C[Base de Datos - PostgreSQL]
     B --> D[Servicio de IA - OpenAI]
-    B --> E[Caché - Redis]
-    F[CDN] --> A
 ```
 
 ### **2.2. Descripción de componentes principales:**
@@ -114,7 +106,7 @@ graph TD
    - Interfaz de usuario moderna y responsiva
    - Gestión de estado con Zustand
    - Estilizado con TailwindCSS
-   - Optimización de rendimiento con React Query
+   - Componentes reutilizables
 
 2. **Backend (Express)**
    - API RESTful
@@ -130,61 +122,43 @@ graph TD
 4. **Servicio de IA (OpenAI)**
    - GPT-4 para generación de recetas
    - Embeddings para búsqueda semántica
-   - Clasificador para categorización
 
 ### **2.3. Descripción de alto nivel del proyecto y estructura de ficheros:**
 ```
 /
 ├── frontend/                 # Aplicación Next.js
-│   ├── components/          # Componentes reutilizables
-│   ├── pages/              # Rutas y páginas
-│   ├── styles/             # Estilos globales
-│   └── utils/              # Utilidades y helpers
+│   ├── src/
+│   │   ├── app/            # Rutas y páginas
+│   │   ├── components/     # Componentes reutilizables
+│   │   ├── services/      # Servicios API
+│   │   ├── store/         # Estado global (Zustand)
+│   │   └── types/         # Definiciones de tipos
 ├── backend/                 # API Express
-│   ├── controllers/        # Controladores
-│   ├── models/            # Modelos de datos
-│   ├── routes/            # Rutas API
-│   └── services/          # Servicios de negocio
-├── docs/                   # Documentación
-└── tests/                 # Tests automatizados
+│   ├── src/
+│   │   ├── controllers/   # Controladores
+│   │   ├── routes/        # Rutas API
+│   │   ├── services/      # Servicios de negocio
+│   │   ├── types/         # Definiciones de tipos
+│   │   └── middleware/    # Middlewares
+│   └── prisma/            # Esquema y migraciones
 ```
 
 ### **2.4. Infraestructura y despliegue:**
 - **Desarrollo:**
-  - Docker para contenedores
-  - Docker Compose para orquestación local
-
-- **Producción:**
-  - Kubernetes para orquestación
-  - CI/CD con GitHub Actions
-  - CDN para assets estáticos
+  - Node.js para runtime
+  - npm para gestión de paquetes
+  - TypeScript para tipado estático
 
 ### **2.5. Seguridad:**
 1. **Autenticación y Autorización**
    - JWT con refresh tokens
-   - Rate limiting por IP
    - Validación de datos
+   - Protección de rutas
 
 2. **Protección de Datos**
    - Encriptación de datos sensibles
    - Sanitización de inputs
    - Protección contra XSS
-
-3. **Monitoreo**
-   - Logging centralizado
-   - Detección de anomalías
-   - Auditoría de seguridad
-
-### **2.6. Tests:**
-1. **Frontend**
-   - Jest para unit testing
-   - Cypress para E2E
-   - Storybook para componentes
-
-2. **Backend**
-   - Jest para unit testing
-   - Supertest para API testing
-   - Prisma Mock para DB testing
 
 ---
 
@@ -202,7 +176,6 @@ erDiagram
         string email
         string password_hash
         string name
-        jsonb preferences
         timestamp created_at
     }
     
@@ -214,6 +187,9 @@ erDiagram
         jsonb instructions
         int cooking_time
         string difficulty
+        int servings
+        string image_url
+        jsonb dietary_restrictions
         uuid created_by FK
         timestamp created_at
     }
@@ -228,12 +204,13 @@ erDiagram
 ### **3.2. Descripción de entidades principales:**
 1. **Users**
    - Almacena información de usuarios
-   - Preferencias en formato JSON
+   - Autenticación y autorización
    - Relación 1:N con Recipes
 
 2. **Recipes**
    - Almacena recetas completas
    - Ingredientes e instrucciones en JSON
+   - Restricciones dietéticas
    - Relación N:M con Users (favoritos)
 
 3. **Favorites**
@@ -273,7 +250,7 @@ requestBody:
                 type: number
               difficulty:
                 type: string
-                enum: [easy, medium, hard]
+                enum: [FÁCIL, MEDIA, DIFÍCIL]
           servings:
             type: number
 responses:
@@ -298,7 +275,7 @@ responses:
 - Puedo ingresar mis ingredientes disponibles
 - Puedo especificar mis preferencias dietéticas
 - Recibo una receta completa con instrucciones
-- La receta incluye información nutricional
+- La receta se guarda en mi perfil
 
 ### Historia de Usuario 2
 **Como** usuario con restricciones dietéticas  
@@ -308,8 +285,8 @@ responses:
 **Criterios de Aceptación:**
 - Puedo especificar mis restricciones dietéticas
 - El sistema filtra recetas según mis restricciones
-- Recibo alternativas para ingredientes problemáticos
-- Se muestran advertencias de alergenos
+- Puedo guardar recetas en favoritos
+- Puedo ver el detalle completo de cada receta
 
 ### Historia de Usuario 3
 **Como** usuario que quiere mejorar sus habilidades culinarias  
@@ -317,8 +294,8 @@ responses:
 **Para** aprender nuevas recetas y técnicas
 
 **Criterios de Aceptación:**
-- El sistema analiza mi historial de recetas
-- Recibo recomendaciones basadas en mis preferencias
+- El sistema analiza mis preferencias
+- Recibo recomendaciones basadas en mis gustos
 - Las recomendaciones incluyen nivel de dificultad
 - Puedo guardar recetas para practicar después
 
@@ -337,7 +314,6 @@ Implementar sistema de autenticación JWT con refresh tokens
 2. Implementar middleware de autenticación
 3. Configurar refresh tokens
 4. Implementar validación de datos
-5. Añadir tests unitarios
 
 ### Ticket 2: Desarrollo de Interfaz de Búsqueda
 **Tipo:** Frontend
@@ -350,20 +326,18 @@ Crear interfaz de búsqueda de recetas con filtros avanzados
 2. Implementar filtros dinámicos
 3. Integrar con API de búsqueda
 4. Añadir animaciones y feedback
-5. Implementar tests E2E
 
-### Ticket 3: Optimización de Base de Datos
-**Tipo:** Base de Datos
-**Prioridad:** Media
+### Ticket 3: Integración con OpenAI
+**Tipo:** Backend
+**Prioridad:** Alta
 **Descripción:**
-Optimizar consultas y estructura de la base de datos
+Integrar el servicio de IA para generación de recetas
 
 **Tareas:**
-1. Analizar consultas lentas
-2. Crear índices necesarios
-3. Optimizar esquema de datos
-4. Implementar caché con Redis
-5. Documentar optimizaciones
+1. Configurar cliente de OpenAI
+2. Implementar prompts optimizados
+3. Manejar respuestas y errores
+4. Almacenar recetas generadas
 
 ---
 
@@ -376,8 +350,8 @@ Implementación del sistema de autenticación con JWT
 **Cambios principales:**
 - Nuevos endpoints de autenticación
 - Middleware de verificación
-- Tests unitarios
-- Documentación actualizada
+- Store de autenticación en frontend
+- Protección de rutas
 
 ### Pull Request 2: Integración con OpenAI
 **Descripción:**
@@ -387,14 +361,14 @@ Integración del servicio de IA para generación de recetas
 - Servicio de OpenAI
 - Prompts optimizados
 - Manejo de errores
-- Tests de integración
+- Almacenamiento de recetas
 
-### Pull Request 3: Optimización de Rendimiento
+### Pull Request 3: Interfaz de Usuario
 **Descripción:**
-Mejoras de rendimiento en frontend y backend
+Implementación de la interfaz de usuario principal
 
 **Cambios principales:**
-- Implementación de caché
-- Optimización de consultas
-- Lazy loading de componentes
-- Métricas de rendimiento
+- Componentes de recetas
+- Sistema de búsqueda
+- Gestión de favoritos
+- Diseño responsivo
