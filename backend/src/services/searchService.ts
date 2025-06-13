@@ -48,12 +48,15 @@ export const searchService = {
                  "ingredients": ["string"] (lista de ingredientes),
                  "instructions": ["string"] (pasos de preparación),
                  "cookingTime": number (tiempo en minutos),
-                 "difficulty": "facil" | "medio" | "dificil"
+                 "difficulty": "facil" | "medio" | "dificil",
+                 "imageUrl": "string (URL de una imagen representativa de la receta, debe ser una URL válida de una imagen real)"
                }
             3. Genera entre 3 y 5 recetas relevantes
             4. Asegúrate que las recetas sean realistas y factibles
             5. Los tiempos de cocción deben ser razonables
-            6. Las dificultades deben ser apropiadas para la receta`
+            6. Las dificultades deben ser apropiadas para la receta
+            7. Las URLs de las imágenes deben ser de imágenes reales y relevantes para la receta
+            8. Usa URLs de imágenes de alta calidad y que representen bien la receta`
           },
           {
             role: "user",
