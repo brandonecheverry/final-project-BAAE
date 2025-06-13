@@ -18,4 +18,5 @@ export interface Recipe {
     nutFree?: boolean;
     other?: string[];
   };
+  likes?: number;
 } 
